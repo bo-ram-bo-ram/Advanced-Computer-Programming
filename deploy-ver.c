@@ -28,24 +28,26 @@ void init(Game* game) {
     game->player.y = 0;
     game->map[game->player.x][game->player.y] = 1; // player
 
-    // Àû1ÀÇ À§Ä¡ ¼³Á¤
+    // ì 1ì˜ ìœ„ì¹˜ ì„¤ì •
+    game->enemy1.x = rand() % MAP_SIZE;
+    game->enemy1.y = rand() % MAP_SIZE;
+    game->map[game->enemy1.x][game->enemy1.y] = 2; // enemy1
 
-
-
-    // Àû2ÀÇ À§Ä¡ ¼³Á¤ (Àû1°ú °ãÄ¡Áö ¾Êµµ·Ï ¼³Á¤)
+    // ì 2ì˜ ìœ„ì¹˜ ì„¤ì • (ì 1ê³¼ ê²¹ì¹˜ì§€ ì•Šë„ë¡ ì„¤ì •)
     do {
-        
+        game->enemy2.x = rand() % MAP_SIZE;
+        game->enemy2.y = rand() % MAP_SIZE;
+    } while (game->enemy2.x == game->enemy1.x && game->enemy2.y == game->enemy1.y); // ì 1ê³¼ ê²¹ì¹˜ì§€ ì•Šë„ë¡ ë°˜ë³µ
+    game->map[game->enemy2.x][game->enemy2.y] = 2; // enemy2
 
-    } while (game->enemy2.x == game->enemy1.x && game->enemy2.y == game->enemy1.y); // Àû1°ú °ãÄ¡Áö ¾Êµµ·Ï ¹İº¹
-
-    // ÄÚÀÎÀÇ À§Ä¡ ¼³Á¤ (Àû1°ú Àû2, ÇÃ·¹ÀÌ¾î¿Í °ãÄ¡Áö ¾Êµµ·Ï ¼³Á¤)
+    // ì½”ì¸ì˜ ìœ„ì¹˜ ì„¤ì • (ì 1ê³¼ ì 2, í”Œë ˆì´ì–´ì™€ ê²¹ì¹˜ì§€ ì•Šë„ë¡ ì„¤ì •)
     do {
-
-
+        game->coin.x = rand() % MAP_SIZE;
+        game->coin.y = rand() % MAP_SIZE;
     } while ((game->coin.x == game->enemy1.x && game->coin.y == game->enemy1.y) ||
         (game->coin.x == game->enemy2.x && game->coin.y == game->enemy2.y) ||
-        (game->coin.x == game->player.x && game->coin.y == game->player.y)); // Àû1, Àû2, ÇÃ·¹ÀÌ¾î¿Í °ãÄ¡Áö ¾Êµµ·Ï ¹İº¹
-    
+        (game->coin.x == game->player.x && game->coin.y == game->player.y)); // ì 1, ì 2, í”Œë ˆì´ì–´ì™€ ê²¹ì¹˜ì§€ ì•Šë„ë¡ ë°˜ë³µ
+    game->map[game->coin.x][game->coin.y] = 3; // coin
 }
 
 void print(Game* game) {
@@ -75,26 +77,27 @@ void Enemy_move(Game* game, Position* enemy) {
     int prev_x = enemy->x;
     int prev_y = enemy->y;
 
-    // ÀÌÀü À§Ä¡¸¦ Áö¿ò   
+    // ì´ì „ ìœ„ì¹˜ë¥¼ ì§€ì›€
     game->map[prev_x][prev_y] = 0;
-    // ÀûÀÇ »õ·Î¿î À§Ä¡ °è»ê
+    // ì ì˜ ìƒˆë¡œìš´ ìœ„ì¹˜ ê³„ì‚°
     int new_x = prev_x;
     int new_y = prev_y;
-    
-    
+    switch (direction) {
+    case 0:
+        new_x++;
+        break;
+    case 1:
+        new_x--;
+        break;
+    case 2:
+        new_y++;
+        break;
+    case 3:
+        new_y--;
+        break;
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-    // »õ·Î¿î À§Ä¡°¡ ¸Ê ¹üÀ§ ³»¿¡ ÀÖ°í, ÄÚÀÎ À§Ä¡¿Í °ãÄ¡Áö ¾Ê°í, ´Ù¸¥ ¸ó½ºÅÍ¿Í °ãÄ¡Áö ¾ÊÀ» ¶§ ÀÌµ¿
+    // ìƒˆë¡œìš´ ìœ„ì¹˜ê°€ ë§µ ë²”ìœ„ ë‚´ì— ìˆê³ , ì½”ì¸ ìœ„ì¹˜ì™€ ê²¹ì¹˜ì§€ ì•Šê³ , ë‹¤ë¥¸ ëª¬ìŠ¤í„°ì™€ ê²¹ì¹˜ì§€ ì•Šì„ ë•Œ ì´ë™
     if (new_x >= 0 && new_x < MAP_SIZE && new_y >= 0 && new_y < MAP_SIZE &&
         !(new_x == game->coin.x && new_y == game->coin.y) &&
         !(new_x == game->enemy1.x && new_y == game->enemy1.y) &&
@@ -106,22 +109,23 @@ void Enemy_move(Game* game, Position* enemy) {
 
 
 int checkWin(Game* game) {
-    if () {
+    if (game->player.x == game->coin.x && game->player.y == game->coin.y) {
         return 1;
     }
     return 0;
 }
 
 int checkLose(Game* game) {
-    if () {
+    if (game->player.x == game->enemy1.x && game->player.y == game->enemy1.y
+        || game->player.x == game->enemy2.x && game->player.y == game->enemy2.y) {
         return 1;
     }
     return 0;
 }
 
 void printCoin() {
-    printf("***COIN °ÔÀÓ***\n");
-    printf("[½ºÆäÀÌ½º¹Ù¸¦ ´­·¯¼­ °ÔÀÓ ½ÃÀÛ].\n");
+    printf("***COIN ê²Œì„***\n");
+    printf("[ìŠ¤í˜ì´ìŠ¤ë°”ë¥¼ ëˆŒëŸ¬ì„œ ê²Œì„ ì‹œì‘].\n");
     printf("            /&         /&         /&\n ");
     printf("           /&&        /&&&       /&& \n");
     printf("       ___/   &&_____&&  &&_____/  &&___  \\ \n");
@@ -142,12 +146,12 @@ void printCoin() {
 }
 
     int main() {
-        srand(       );
+        srand(time(NULL));
         char ch;
         Game game;
 
         printCoin();
-        ch = ;
+        ch = _getch(); // getch í˜¸ì¶œ ì´í›„ printCoinì´ ì¶œë ¥ë˜ë„ë¡ ìˆœì„œ ë³€ê²½
 
         init(&game);
         print(&game);
@@ -159,53 +163,53 @@ void printCoin() {
             case 72: // up arrow key
                 game.map[game.player.x][game.player.y] = 0;
                 if (game.player.x != 0) {
-                    
-                    
+                    game.player.x--;
+                    break;
                 }
                 else
-                    
+                    continue; // ë‹¤ì‹œ ì…ë ¥ ë°›ë„ë¡ continue ì‚¬ìš©
             case 80: // down arrow key
                 game.map[game.player.x][game.player.y] = 0;
                 if (game.player.x != MAP_SIZE - 1) {
-                    
-                    
+                    game.player.x++;
+                    break;
                 }
                 else
-                    
+                    continue; // ë‹¤ì‹œ ì…ë ¥ ë°›ë„ë¡ continue ì‚¬ìš©
             case 75: // left arrow key
                 game.map[game.player.x][game.player.y] = 0;
                 if (game.player.y != 0) {
-                    
-
+                    game.player.y--;
+                    break;
                 }
                 else
-                    
+                    continue; // ë‹¤ì‹œ ì…ë ¥ ë°›ë„ë¡ continue ì‚¬ìš©
             case 77: // right arrow key
                 game.map[game.player.x][game.player.y] = 0;
                 if (game.player.y != MAP_SIZE - 1) {
-                    
-                    
+                    game.player.y++;
+                    break;
                 }
                 else
-                    
+                    continue; // ë‹¤ì‹œ ì…ë ¥ ë°›ë„ë¡ continue ì‚¬ìš©
             default:
-                
+                continue; // ë‹¤ì‹œ ì…ë ¥ ë°›ë„ë¡ continue ì‚¬ìš©
             }
 
-            Enemy_move(); // Àû1ÀÇ ¿òÁ÷ÀÓ
-            Enemy_move(); // Àû2ÀÇ ¿òÁ÷ÀÓ
+            Enemy_move(&game, &game.enemy1); // ì 1ì˜ ì›€ì§ì„
+            Enemy_move(&game, &game.enemy2); // ì 2ì˜ ì›€ì§ì„
             game.map[game.player.x][game.player.y] = 1;
             game.map[game.enemy1.x][game.enemy1.y] = 2;
             game.map[game.enemy2.x][game.enemy2.y] = 2;
             game.map[game.coin.x][game.coin.y] = 3;
             print(&game);
 
-            if () {
-                printf("ÃàÇÏÇÕ´Ï´Ù! ÄÚÀÎÀ» È¹µæÇÏ¿© °ÔÀÓ¿¡¼­ ÀÌ°å½À´Ï´Ù.\n");
+            if (checkWin(&game)) {
+                printf("ì¶•í•˜í•©ë‹ˆë‹¤! ì½”ì¸ì„ íšë“í•˜ì—¬ ê²Œì„ì—ì„œ ì´ê²¼ìŠµë‹ˆë‹¤.\n");
                 break;
             }
-            if () {
-                printf("¾Æ½±Áö¸¸, ¸ó½ºÅÍ¿¡°Ô ÀâÇô °ÔÀÓ¿¡¼­ Á³½À´Ï´Ù.\n");
+            if (checkLose(&game)) {
+                printf("ì•„ì‰½ì§€ë§Œ, ëª¬ìŠ¤í„°ì—ê²Œ ì¡í˜€ ê²Œì„ì—ì„œ ì¡ŒìŠµë‹ˆë‹¤.\n");
                 break;
             }
         }
